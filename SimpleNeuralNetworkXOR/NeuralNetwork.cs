@@ -60,7 +60,7 @@ namespace SimpleNeuralNetworkXOR
                 }
             } 
         }
-        public void BackProp(float[] _targets)
+        public void BackProp(float[] _targets, float _learningRate = 0.05f)
         {
             //layers[layers.Length - 1].BackPropOutput(_targets);  
             for(int i = layers.Length - 1; i > 0; i--)
@@ -78,7 +78,7 @@ namespace SimpleNeuralNetworkXOR
             } 
             for (int i = 0; i < layers.Length; i++)
             {
-                layers[i].UpdateWeights();
+                layers[i].UpdateWeights(_learningRate);
             }
         }
         public float[] GetOutput()
@@ -92,7 +92,7 @@ namespace SimpleNeuralNetworkXOR
             int numOfInput = 0;
             int numOfOutput = 0;
             int numOfLayer = 0;
-
+             
             public float[] inputs;
             public float[] outputs;
             public float[] activates;
@@ -144,7 +144,7 @@ namespace SimpleNeuralNetworkXOR
                         //Console.WriteLine($"outputs[{i}] = {inputs[j]} * {weights[j, i]}");
                         outputs[i] += inputs[j] * weights[j, i];
                     }
-                    activates[i] = Sigmoid(outputs[i]);
+                    activates[i] = ActivationFunction(outputs[i]);
                     //Console.WriteLine($"outputs[{i}] = {outputs[i]}");
                     //Console.WriteLine($"activates[{i}] = {activates[i]}");
                 } 
@@ -159,7 +159,7 @@ namespace SimpleNeuralNetworkXOR
                 }
                 for (int i = 0; i < numOfOutput; i++)
                 {
-                    gamma[i] = errors[i] * SigmoidPrime(activates[i]);
+                    gamma[i] = errors[i] * DerivativeFunction(activates[i]);
                 }
                 for (int i = 0; i < numOfOutput; i++)
                 {
@@ -180,7 +180,7 @@ namespace SimpleNeuralNetworkXOR
                     {
                         gamma[i] += gammaForward[j] * weightsForward[i, j];
                     }
-                    gamma[i] *= SigmoidPrime(activates[i]);
+                    gamma[i] *= DerivativeFunction(activates[i]);
                 }
                 for (int i = 0; i < numOfOutput; i++)
                 {
@@ -190,13 +190,13 @@ namespace SimpleNeuralNetworkXOR
                     }
                 } 
             }
-            public void UpdateWeights()
+            public void UpdateWeights(float _learningRate = 0.05f)
             {
                 for (int i = 0; i < numOfOutput; i++)
                 {
                     for (int j = 0; j < numOfInput; j++)
                     {
-                        weights[j, i] -= deltas[j, i] * 0.05f;
+                        weights[j, i] -= _learningRate * deltas[j, i];
                     }
                 }
             }
@@ -204,10 +204,18 @@ namespace SimpleNeuralNetworkXOR
             {
                 for(int i = 0; i < numOfOutput; i++)
                 {
-                    activates[i] = Sigmoid(outputs[i]);
+                    activates[i] = ActivationFunction(outputs[i]);
                 }
                 return activates;
             } 
+            public float ActivationFunction(float x)
+            {
+                return Tanh(x);
+            }
+            public float DerivativeFunction(float x)
+            {
+                return TanhPrime(x);
+            }
             public float Sigmoid(float x)
             {
                 float exp = (float)Math.Exp(-x);
